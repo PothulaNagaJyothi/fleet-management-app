@@ -41,7 +41,7 @@
         <script>
             var VALID_EMAIL="admin@gmail.com";
             var VALID_PASSWORD="admin1234";
-        document.getElementbyId("loginform").addEventListener("submit",function(e) {
+        var form= document.getElementbyId("loginform").addEventListener("submit",function(e) {
             e.preventDefault();
             var email = document.getElementById("email").value.trim();
             var password= document.getElementById("password").value.trim();
