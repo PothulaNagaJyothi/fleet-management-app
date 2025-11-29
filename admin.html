@@ -76,7 +76,44 @@
                 margin-bottom : 8px;
             }
 
-            
+            #cardsContainer {
+                display:grid;
+                grid-template-columns:repeat(3,1fr);
+                gap: 8px;
+            }
+
+            .card {
+                border : 1px solid #ccc;
+                padding: 6px;
+                font-size: 13px;
+            }
+
+            .card img {
+                width: 100%;
+                height: 100px;
+                object-fit: cover;
+                margin-bottom: 4px;
+            }
+
+            .card h3 {
+                margin : 4px 0;
+                font-size : 14px;
+            }
+
+            .card p {
+                margin: 2px 0;
+            }
+
+            .card-buttons {
+                margin-top : 6px;
+                display:flex;
+                gap: 4px;
+                flex-wrap:wrap;
+            }
+
+            .card-buttons button {
+                flex : 1;
+            }
         </style>
     </head>
     <body>
