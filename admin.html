@@ -132,7 +132,7 @@
             var card=document.createElement("div");
             card.className="card";
             var img = document.createElement("img");
-            img.src="";//image addition
+            img.src="https://coding-platform.s3.amazonaws.com/dev/lms/tickets/5e80fcb6-3f8e-480c-945b-30a5359eb40e/JNmYjkVr3WOjsrbu.png";
             img.alt="Vehicle";
             var title= document.createElement("h3");
             title.textContent=fleet.regNo;
@@ -204,7 +204,27 @@
         fleets[idx].driver=newName;
         renderCards();
         }
-        
+
+        function toggleAvailability(id) {
+            var idx=findFleetIndexById(id);
+            if(idx===-1) return;
+
+            fleets[idx].available= !fleets[idx].available;
+            renderCards();
+        }
+
+        function deleteFleet(id) {
+            var idx= findFleetIndexById(id);
+            if(idx===-1) return;
+
+            var ok=confirm("Delete this vehicle?");
+            if(!ok) return;
+
+            fleets.splice(idx,1);
+            renderCards();
+        }
+
+        renderCards();
         </script>
     </body>
 </html>
