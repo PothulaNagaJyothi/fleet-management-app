@@ -1,339 +1,268 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>Fleet Management - Admin</title>
-        <style>
-            body {
-                margin:0;
-                font-family: Arial, Helvetica, sans-serif;
-            }
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fleet Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 10px;
+    }
+    nav {
+      padding: 8px;
+      background: #eee;
+      margin-bottom: 10px;
+    }
+    nav select, nav button {
+      margin-right: 8px;
+      padding: 4px;
+      font-size: 14px;
+    }
+    .layout {
+      display: flex;
+      gap: 12px;
+    }
+    aside {
+      width: 230px;
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
+    main {
+      flex: 1;
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
+    .form-group {
+      margin-bottom: 10px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 2px;
+      font-size: 14px;
+    }
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 4px;
+    }
+    #cardsContainer {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .card {
+      border: 1px solid #ccc;
+      padding: 8px;
+      font-size: 14px;
+    }
+    .card img {
+      width: 100%;
+      height: 100px;
+      object-fit: cover;
+      margin-bottom: 6px;
+    }
+    .card-buttons {
+      display: flex;
+      gap: 4px;
+      margin-top: 6px;
+    }
+    .card-buttons button {
+      flex: 1;
+      padding: 4px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
 
-            nav {
-                padding: 8px 12px;
-                background: #eee;
-            font-size: 14px;
-                }
+  <nav>
+    <strong>Fleet Dashboard</strong>
 
-            nav h1 {
-                display: inline-block;
-                margin: 0;
-                margin-right: 16px;
-                font-size: 18px;
-            }
-            nav label {
-                margin-right: 4px;
-            }
-            nav select {
-                margin-right: 8px;
-            }
+    <label>Category:</label>
+    <select id="categoryFilter">
+      <option value="All">All</option>
+      <option value="Auto">Auto</option>
+      <option value="Car">Car</option>
+      <option value="Truck">Truck</option>
+      <option value="Bus">Bus</option>
+    </select>
 
-            button {
-                padding: 4px 8px;
-                font-size : 13px;
-            }
+    <label>Availability:</label>
+    <select id="availabilityFilter">
+      <option value="All">All</option>
+      <option value="Available">Available</option>
+      <option value="Unavailable">Unavailable</option>
+    </select>
 
-            .layout {
-                display:flex;
-                padding:12px;
-                gap:12px;
-            }
-            aside {
-                width: 230px;
-                border: 1px solid #ccc;
-                padding: 10px;
-                font-size: 14px;
-            }
+    <button id="clearFilterBtn">Clear Filter</button>
+  </nav>
 
-            main {
-                flex:-1;
-                border : 1px solid #ccc;
-                padding: 10px;
-                font-size :14px;
-            }
+  <div class="layout">
+    <aside>
+      <h3>Add Fleet</h3>
 
-            h2 {
-                margin-top: 0;
-                font-size: 16px;
-            }
+      <div class="form-group">
+        <label>Reg No</label>
+        <input id="regNo" type="text">
+      </div>
 
-            .form-group {
-                margin-bottom: 8px;
-            }
+      <div class="form-group">
+        <label>Category</label>
+        <select id="category">
+          <option value="">Select</option>
+          <option value="Auto">Auto</option>
+          <option value="Car">Car</option>
+          <option value="Truck">Truck</option>
+          <option value="Bus">Bus</option>
+        </select>
+      </div>
 
-            .form-group label {
-                display:block;
-                margin-bottom: 4px;
-            }
+      <div class="form-group">
+        <label>Driver Name</label>
+        <input id="driverName" type="text">
+      </div>
 
-            .form-group input,.form-group select {
-                width: 100%;
-                padding:4px;
-                font-size: 13px;
-            }
+      <div>
+        <input type="checkbox" id="isAvailable" checked>
+        <label for="isAvailable">Available</label>
+      </div>
 
-            .checkbox-row {
-                margin-bottom : 8px;
-            }
+      <button id="addFleetBtn">Add Fleet</button>
+    </aside>
 
-            #cardsContainer {
-                display:grid;
-                grid-template-columns:repeat(3,1fr);
-                gap: 8px;
-            }
+    <main>
+      <h3>Fleet Vehicles</h3>
+      <div id="cardsContainer"></div>
+    </main>
+  </div>
 
-            .card {
-                border : 1px solid #ccc;
-                padding: 6px;
-                font-size: 13px;
-            }
+  <script>
+    var fleets = [];
+    var nextId = 1;
 
-            .card img {
-                width: 100%;
-                height: 100px;
-                object-fit: cover;
-                margin-bottom: 4px;
-            }
+    var regNoInput = document.getElementById("regNo");
+    var categoryInput = document.getElementById("category");
+    var driverInput = document.getElementById("driverName");
+    var availInput = document.getElementById("isAvailable");
+    var addBtn = document.getElementById("addFleetBtn");
 
-            .card h3 {
-                margin : 4px 0;
-                font-size : 14px;
-            }
+    var cardsContainer = document.getElementById("cardsContainer");
 
-            .card p {
-                margin: 2px 0;
-            }
+    var categoryFilter = document.getElementById("categoryFilter");
+    var availabilityFilter = document.getElementById("availabilityFilter");
+    var clearFilterBtn = document.getElementById("clearFilterBtn");
 
-            .card-buttons {
-                margin-top : 6px;
-                display:flex;
-                gap: 4px;
-                flex-wrap:wrap;
-            }
+    addBtn.addEventListener("click", function () {
+      var reg = regNoInput.value.trim();
+      var cat = categoryInput.value;
+      var driver = driverInput.value.trim();
+      var available = availInput.checked;
 
-            .card-buttons button {
-                flex : 1;
-            }
-        </style>
-    </head>
-    <body>
-        <nav>
-            <h1>Fleet Dashboard</h1>
-            <label for="categoryFilter">Category:</label>
-            <select id="categoryFilter">
-                <option value="All">All</option>
-                <option value="Auto">Auto</option>
-                <option value="Car">Car</option>
-                <option value="Truck">Truck</option>
-                <option value="Bus">Bus</option>
-            </select>
-            <label for="availabilityFilter">Availability:</label>
-            <select id="availabilityFilter">
-                <option value="All">All</option>
-                <option value="Available">Available</option>
-                <option value="Unavailable">Unavailable</option>
-            </select>
-            <button id="clearFilterBtn">Clear Filter</button>
-        </nav>
-        <div class="layout">
-            <aside>
-                <h2>Add Fleet</h2>
-                <div class="form-group">
-                    <label for="regNo">Reg No of Vehicle</label>
-                    <input id="regNo" type="text">
-                </div>
-                <div class="form-group">
-                    <label for="category">Category</label>
-                    <select id="category">
-                        <option vaue="">Select</option>
-                        <option value="Auto">Auto</option>
-                        <option value="Car">Car</option>
-                        <option value="Truck">Truck</option>
-                        <option value="Bus">Bus</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="driverName">Driver Name</label>
-                    <input id="driverName" type="text">
-                </div>
-                <div class="checkbox-row">
-                    <input type="checkbox" id="isAvailable" checked>
-                    <label for="isAvailable">Available</label>
-                </div>
-                <button id="addFleetBtn">Add Fleet</button>
-            </aside>
+      if (reg === "" || cat === "" || driver === "") {
+        alert("All fields are required.");
+        return;
+      }
 
-            <main>
-                <h2>Fleet Vehicles</h2>
-                <div id="cardsContainer"></div>
-            </main>
-        </div>
-        <script>
-            var fleets=[];
-            var nextId=1;
-            var regNoInput=document.getElementById("regNo");
-            var categoryInput=document.getElementById("category");
-            var driverInput=document.getElementById("driverName");
-            var availInput=document.getElementById("isAvailable");
-            var addBtn=document.getElementById("addFleetBtn");
-            var cardsContainer=document.getElementById("cardsContainer");
-            var categoryFilter=document.getElementById("categoryFilter");
-            var availabilityFilter=document.getElementById("availabilityFilter");
-            var clearFilterBtn=document.getElementById("clearFilterBtn");
+      fleets.push({
+        id: nextId++,
+        regNo: reg,
+        category: cat,
+        driver: driver,
+        available: available
+      });
 
-            addBtn.addEventListener("click",function() {
-                var regNo =regNoInput.value.trim();
-                var category =categoryInput.value.trim();
-                var driver = driverInput.value.trim();
-                var isAvailable=availInput.checked;
+      regNoInput.value = "";
+      categoryInput.value = "";
+      driverInput.value = "";
+      availInput.checked = true;
 
-                if(regNo ==="" || category==="" || driver==="")
-            {
-                alert("RegNo,Category and Driver Name are required.");
-                return;
-            }
+      render();
+    });
 
-            var fleet = {
-                id: nextId++,
-                regNo:regNo,
-                category: category,
-                driver : driver,
-                available : isAvailable
-            };
+    categoryFilter.addEventListener("change", render);
+    availabilityFilter.addEventListener("change", render);
+    clearFilterBtn.addEventListener("click", function () {
+      categoryFilter.value = "All";
+      availabilityFilter.value = "All";
+      render();
+    });
 
-            fleets.push(fleet);
-            regNoInput.value="";
-            categoryInput.value="";
-            driverInput.value="";
-            availInput.checked =true;
+    function render() {
+      cardsContainer.innerHTML = "";
 
-            renderCards();
-            });
+      var catFilter = categoryFilter.value;
+      var availFilter = availabilityFilter.value;
 
-            categoryFilter.addEventListener("change",renderCards);
-            availabilityFilter.addEventListener("change",renderCards);
-            clearFilterBtn.addEventListener("click",function(){
-                categoryFilter.value="All";
-                availabilityFilter.value="All";
-                renderCards();
-        });
-        function renderCards() {
-            cardsContainer.innerHTML ="";
+      fleets.forEach(function (f) {
+        if (catFilter !== "All" && f.category !== catFilter) return;
+        if (availFilter === "Available" && !f.available) return;
+        if (availFilter === "Unavailable" && f.available) return;
 
-            var selectedCategory=categoryFilter.value;
-            var selectedAvailability= availabilityFilter.value;
-            var filtered = fleets.filter(function (fleet) {
-                var okCategory= selectedCategory==="All" || fleet.category===selectedCategory;
-                var okAvailability=true;
-                if(selectedAvailability==="Available")
-            {
-                okAvailability=fleet.available===true;
-            }
-            else if(selectedAvailability==="Unavailable") {
-                okAvailability=fleet.available===false;
-            }
-            return okCategory && okAvailability;
+        var card = document.createElement("div");
+        card.className = "card";
 
-            });
+        var img = document.createElement("img");
+        img.src = "https://coding-platform.s3.amazonaws.com/dev/lms/tickets/5e80fcb6-3f8e-480c-945b-30a5359eb40e/JNmYjkVr3WOjsrbu.png";
 
-            filtered.forEach(function(fleet)
-        {
-            var card=document.createElement("div");
-            card.className="card";
-            var img = document.createElement("img");
-            img.src="https://coding-platform.s3.amazonaws.com/dev/lms/tickets/5e80fcb6-3f8e-480c-945b-30a5359eb40e/JNmYjkVr3WOjsrbu.png";
-            img.alt="Vehicle";
-            var title= document.createElement("h3");
-            title.textContent=fleet.regNo;
-            var catP=document.createElement("p");
-            catP.textContent="Category:"+fleet.category;
-            var driverP=document.createElement("p");
-            driverP.textContent="Driver:"+fleet.driver;
-            var statusP=document.createElement("p");
-            statusP.textContent="Status:"+(fleet.available?"Available" : "Unavailable");
-            var btnWrapper=document.createElement("div");
-            btnWrapper.className="card-buttons";
-            var updateBtn=document.createElement("button");
-            updateBtn.textContent="Update Driver";
-            updaeBtn.addEventListener("click",function(){
-                updateDriver(fleet.id);
-            });
+        var h = document.createElement("h4");
+        h.textContent = f.regNo;
 
-            var toggleBtn=document.createElement("button");
-            toggleBtn.textContent="Change Availability";
-            toggleBtn.addEventListener("click",function () {
-                toggleAvailability(fleet.id);
-            });
-            var deleteBtn= document.createElement("button");
-            deleteBtn.textContent="Delete Vehicle";
-            deleteBtn.addEventListener("click",function(){ 
-                deleteFleet(fleet.id);
-            });
+        var c = document.createElement("p");
+        c.textContent = "Category: " + f.category;
 
-            btnWrapper.appendChild(updateBtn);
-            btnWrapper.appendChild(toggleBtn);
-            btnWrapper.appendChild(deleteBtn);
+        var d = document.createElement("p");
+        d.textContent = "Driver: " + f.driver;
 
-            card.appendChild(img);
-            card.appendChild(title);
-            card.appendChild(catP);
-            card.appendChild(driverP);
-            card.appendChild(statusP);
-            card.appendChild(btnWrapper);
+        var s = document.createElement("p");
+        s.textContent = "Status: " + (f.available ? "Available" : "Unavailable");
 
-            cardsContainer.appendChild(card);
-        });
+        var btns = document.createElement("div");
+        btns.className = "card-buttons";
 
-        }
+        var updateBtn = document.createElement("button");
+        updateBtn.textContent = "Update";
+        updateBtn.onclick = function () {
+          var newName = prompt("New driver name:", f.driver);
+          if (newName && newName.trim() !== "") {
+            f.driver = newName.trim();
+            render();
+          }
+        };
 
-        function findFleetIndexById(id) {
-            for(var i=0;i<fleets.length;i++)
-        {
-            if(fleets[i].id===id)
-            return i;
-        }
-        return -1;
-        }
+        var toggleBtn = document.createElement("button");
+        toggleBtn.textContent = "Toggle";
+        toggleBtn.onclick = function () {
+          f.available = !f.available;
+          render();
+        };
 
-        function updateDriver(id) {
-            var idx=findFleetIndexById(id);
-            if(idx===-1) return;
+        var deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "Delete";
+        deleteBtn.onclick = function () {
+          if (confirm("Delete this vehicle?")) {
+            fleets = fleets.filter(x => x.id !== f.id);
+            render();
+          }
+        };
 
-            var currentName=fleets[idx].driver;
-            var newName =prompt("enter new driver name:",currentName);
-            if(newName===null) return;
+        btns.appendChild(updateBtn);
+        btns.appendChild(toggleBtn);
+        btns.appendChild(deleteBtn);
 
-            newName=newName.trim();
-            if(newName==="")
-        {
-            alert("Driver name cannot be empty.");
-            return;
-        }
+        card.appendChild(img);
+        card.appendChild(h);
+        card.appendChild(c);
+        card.appendChild(d);
+        card.appendChild(s);
+        card.appendChild(btns);
 
-        fleets[idx].driver=newName;
-        renderCards();
-        }
+        cardsContainer.appendChild(card);
+      });
+    }
 
-        function toggleAvailability(id) {
-            var idx=findFleetIndexById(id);
-            if(idx===-1) return;
+    render();
+  </script>
 
-            fleets[idx].available= !fleets[idx].available;
-            renderCards();
-        }
-
-        function deleteFleet(id) {
-            var idx= findFleetIndexById(id);
-            if(idx===-1) return;
-
-            var ok=confirm("Delete this vehicle?");
-            if(!ok) return;
-
-            fleets.splice(idx,1);
-            renderCards();
-        }
-
-        renderCards();
-        </script>
-    </body>
+</body>
 </html>
