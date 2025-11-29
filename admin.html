@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Fleet Management - Admin</title>
+        <style>
+
+        </style>
+    </head>
+    <body>
+        <nav>
+            <h1>Fleet Dashboard</h1>
+            <label for="categoryFilter">Category:</label>
+            <select id="categoryFilter">
+                <option value="All">All</option>
+                <option value="Auto">Auto</option>
+                <option value="Car">Car</option>
+                <option value="Truck">Truck</option>
+                <option value="Bus">Bus</option>
+            </select>
+            <label for="availabilityFilter">Availability:</label>
+            <select id="availabilityFilter">
+                <option value="All">All</option>
+                <option value="Available">Available</option>
+                <option value="Unavailable">Unavailable</option>
+            </select>
+            <button id="clearFilterBtn">Clear Filter</button>
+        </nav>
+        <div class="layout">
+            <aside>
+                <h2>Add Fleet</h2>
+                <div class="form-group">
+                    <label for="regNo">Reg No of Vehicle</label>
+                    <input id="regNo" type="text">
+                </div>
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <select id="category">
+                        <option vaue="">Select</option>
+                        <option value="Auto">Auto</option>
+                        <option value="Car">Car</option>
+                        <option value="Truck">Truck</option>
+                        <option value="Bus">Bus</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="driverName">Driver Name</label>
+                    <input id="driverName" type="text">
+                </div>
+                <div class="checkbox-row">
+                    <input type="checkbox" id="isAvailable" checked>
+                    <label for="isAvailable">Available</label>
+                </div>
+                <button id="addFleetBtn">Add Fleet</button>
+            </aside>
+
+            <main>
+                <h2>Fleet Vehicles</h2>
+                <div id="cardsContainer"></div>
+            </main>
+        </div>
+        <script>
+            var fleets=[];
+            var nextId=1;
+            var regNoInput=document.getElementById("regNo");
+            var categoryInput=document.getElementById("category");
+            var driverInput=document.getElementById("driverName");
+            var availInput=document.getElementById("isAvailable");
+            var addBtn=document.getElementById("addFleetBtn");
+            var cardsContainer=document.getElementById("cardsContainer");
+            var categoryFilter=document.getElementById("categoryFilter");
+            var availabilityFilter=document.getElementById("availabilityFilter");
+            var clearFilterBtn=document.getElementById("clearFilterBtn");
+
+            addBtn.addEventListener("click",function() {
+                var regNo =regNoInput.value.trim();
+                var category =categoryInput.value.trim();
+                var driver = driverInput.value.trim();
+                var isAvailable=availInput.checked;
+
+                if(regNo ==="" || category==="" || driver==="")
+            {
+                alert("RegNo,Category and Driver Name are required.");
+                return;
+            }
+
+            var fleet = {
+                id: nextId++,
+                regNo:regNo,
+                category: category,
+                driver : driver,
+                available : isAvailable
+            };
+
+            fleets.push(fleet);
+            regNoInput.value="";
+            categoryInput.value="";
+            driverInput.value="";
+            availInput.checked =true;
+
+            renderCards();
+            });
+            
+        </script>
+    </body>
+</html>
